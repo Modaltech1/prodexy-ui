@@ -1,15 +1,4 @@
-# 03 — DOCUMENTO PARA USAR COM IA (V0, Lovable, etc.)
-
-Este documento existe para você usar quando for gerar um projeto novo com IA e quiser forçar o uso da sua lib `@prodexy/ui`.
-
-A ideia é simples:
-- a IA cria páginas e regras de negócio
-- o design deve seguir a sua lib
-- a IA não deve inventar outro design system
-
----
-
-# INSTRUÇÃO BASE PARA IA
+# INSTRUÇÃO BASE
 
 Use esta instrução no prompt:
 
@@ -58,9 +47,7 @@ Não recrie componentes genéricos como Button, Input, Card, Dialog, Select, Tab
 
 ---
 
-# EXEMPLO DE BLOCO PARA COLAR EM PROMPT
-
-Use exatamente esta instrução:
+# PROMPT
 
 > Este projeto deve usar a lib compartilhada `@prodexy/ui` como única fonte de design.  
 > Não crie design system local.  
@@ -73,9 +60,7 @@ Use exatamente esta instrução:
 
 ---
 
-# O QUE PEDIR PARA A IA NÃO FAZER
-
-Inclua também estas restrições:
+# NÃO FAZER
 
 - não duplicar botões locais
 - não duplicar inputs locais
@@ -86,9 +71,8 @@ Inclua também estas restrições:
 
 ---
 
-# O QUE A IA PODE CRIAR LOCALMENTE
+# PODE CRIAR LOCALMENTE
 
-A IA pode criar localmente:
 - sidebar
 - header
 - dashboard
@@ -103,8 +87,4 @@ Mas sempre usando os blocos visuais da lib.
 # COMO PENSAR ESSE DOCUMENTO
 
 Este documento não é para explicar a arquitetura da lib.
-Ele é para obrigar a IA a respeitar o design compartilhado.
-
-Se você perceber que a IA começou a inventar outro visual, significa que:
-- o prompt estava fraco
-- ou faltou reforçar que a lib é a única fonte visual
+Ele é para obrigar você a respeitar o design compartilhado.
