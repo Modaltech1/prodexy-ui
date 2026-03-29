@@ -251,6 +251,44 @@ export default function Page() {
     </main>
   )
 }
+<<<<<<< HEAD
+=======
+
+```
+
+---
+
+# 9. CONFIGURAR O `pnpm-workspace.yaml`
+```yaml
+onlyBuiltDependencies:
+  - "@prodexy/ui"
+```
+
+---
+
+## Importante
+Esse arquivo:
+- importa o CSS da lib
+- importa o branding do projeto
+- diz ao Tailwind onde encontrar as classes da lib
+
+Sem isso, os componentes quebram visualmente.
+
+---
+
+# 9. COMO IMPORTAR OS COMPONENTES
+
+Nos arquivos do projeto, use:
+
+```ts
+import { Button, Card, Input, Dialog, DialogContent } from "@prodexy/ui"
+```
+
+Não use mais:
+
+```ts
+import { Button } from "@/components/ui/button"
+>>>>>>> 1baa6974ec6191c575a2db8c730ddc4918450c06
 ```
 
 ---
