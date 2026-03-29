@@ -196,7 +196,17 @@ Causa provável:
 
 ---
 
-# 9. CHECKLIST DE MIGRAÇÃO
+# 9. ARQUIVO pnpm-workspace.yaml
+
+Crie um pnpm-workspace.yaml com:
+```yaml
+onlyBuiltDependencies:
+  - "@prodexy/ui"
+```
+
+---
+
+# 10. CHECKLIST DE MIGRAÇÃO
 
 - [ ] instalei a lib
 - [ ] criei `branding/brand.ts`
@@ -211,7 +221,7 @@ Causa provável:
 
 ---
 
-# 10. RESUMO
+# 11. RESUMO
 
 Migrar projeto existente é:
 

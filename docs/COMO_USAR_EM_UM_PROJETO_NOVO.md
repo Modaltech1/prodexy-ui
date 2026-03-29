@@ -238,6 +238,13 @@ Use assim:
 body {
    font-family: var(--font-body);
 }
+
+# 9. CONFIGURAR O `app/layout.tsx`
+```yaml
+onlyBuiltDependencies:
+  - "@prodexy/ui"
+```
+---
 ```
 
 ## Importante

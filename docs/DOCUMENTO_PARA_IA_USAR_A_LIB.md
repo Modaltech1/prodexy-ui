@@ -44,7 +44,11 @@ Não recrie componentes genéricos como Button, Input, Card, Dialog, Select, Tab
 8. O `layout.tsx` deve importar apenas `./globals.css` e usar `brand.appName`, `brand.description` e `brand.logoUrl`
 9. O projeto deve ser preparado para branding por cliente
 10. Todo componente de negócio pode ser criado localmente, mas o design deve vir da lib
-
+11. Crie um pnpm-workspace.yaml com:
+```yaml
+onlyBuiltDependencies:
+  - "@prodexy/ui"
+```
 ---
 
 # PROMPT
