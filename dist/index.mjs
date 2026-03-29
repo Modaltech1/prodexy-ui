@@ -1125,11 +1125,11 @@ var ChartTooltip = RechartsPrimitive.Tooltip;
 function ChartTooltipContent({
   active,
   payload,
+  label,
   className,
   indicator = "dot",
   hideLabel = false,
   hideIndicator = false,
-  label,
   labelFormatter,
   labelClassName,
   formatter,
@@ -1139,7 +1139,7 @@ function ChartTooltipContent({
 }) {
   const { config } = useChart();
   const tooltipLabel = React3.useMemo(() => {
-    if (hideLabel || !payload?.length) {
+    if (hideLabel || !payload || payload.length === 0) {
       return null;
     }
     const [item] = payload;
@@ -1162,7 +1162,7 @@ function ChartTooltipContent({
     config,
     labelKey
   ]);
-  if (!active || !payload?.length) {
+  if (!active || !payload || payload.length === 0) {
     return null;
   }
   const nestLabel = payload.length === 1 && indicator !== "dot";
@@ -1239,9 +1239,7 @@ function ChartLegendContent({
   nameKey
 }) {
   const { config } = useChart();
-  if (!payload?.length) {
-    return null;
-  }
+  if (!payload || payload.length === 0) return null;
   return /* @__PURE__ */ jsx14(
     "div",
     {
