@@ -239,13 +239,17 @@ body {
    font-family: var(--font-body);
 }
 
-# 9. CONFIGURAR O `app/layout.tsx`
+```
+
+---
+
+# 9. CONFIGURAR O `pnpm-workspace.yaml`
 ```yaml
 onlyBuiltDependencies:
   - "@prodexy/ui"
 ```
+
 ---
-```
 
 ## Importante
 Esse arquivo:
