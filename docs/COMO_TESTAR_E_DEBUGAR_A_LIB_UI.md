@@ -1,440 +1,200 @@
-# COMO TESTAR, VALIDAR E DEBUGAR A LIB `prodexy-ui`
+# Como testar e debugar a `@prodexy/ui`
 
-Este documento explica, de forma prática, como você pode **testar**, **validar** e **debugar** a sua lib de UI.
+## Objetivo
+Este documento estabelece um fluxo profissional para validar mudanças na lib e reduzir regressões em projetos consumidores.
 
-A ideia aqui não é criar burocracia.  
-É te dar um processo simples para garantir que:
+A regra central é simples:
 
-- os componentes funcionem
-- o visual não quebre
-- as mudanças não estraguem outros projetos
-- o consumo da lib pelos projetos clientes seja previsível
+> uma mudança na lib só está pronta quando compila, renderiza corretamente e funciona em pelo menos um projeto real consumidor.
 
 ---
 
-# 1. O QUE VOCÊ PRECISA TESTAR NA PRÁTICA
+## Camadas de validação
 
-Quando você altera a lib, existem **4 camadas de teste**.
+### 1. Build da própria lib
+Valida exportações, tipagem e empacotamento.
 
-## Camada 1 — Teste visual
-Ver se o componente continua bonito e correto.
+### 2. Teste visual local
+Valida aparência, espaçamento, contraste, responsividade e estados visuais.
 
-Exemplos:
-- botão
-- input
-- card
-- modal
-- tabela
-- badge
+### 3. Teste funcional
+Valida interação dos componentes.
 
-Pergunta:
-> “visualmente continua certo?”
+### 4. Teste de integração em projeto consumidor
+Valida consumo real da lib, CSS global, branding e dependências externas.
 
----
-
-## Camada 2 — Teste funcional do componente
-Ver se o componente funciona.
-
-Exemplos:
-- botão responde clique
-- dialog abre/fecha
-- select muda valor
-- toast aparece
-- tabs trocam conteúdo
-
-Pergunta:
-> “o comportamento continua certo?”
+### 5. Teste de build do projeto consumidor
+Valida o cenário de produção.
 
 ---
 
-## Camada 3 — Teste de integração com projeto cliente
-Ver se a lib continua funcionando quando instalada em um projeto real.
+## Fluxo mínimo obrigatório antes de publicar
 
-Pergunta:
-> “o projeto que consome a lib continua renderizando certo?”
-
----
-
-## Camada 4 — Teste de branding
-Ver se trocar:
-- cor
-- fonte
-- logo
-- tema
-
-não quebra layout nem contraste.
-
-Pergunta:
-> “a mesma lib continua boa em clientes diferentes?”
-
----
-
-# 2. MELHOR FORMA DE TESTAR ISSO
-
-Para o seu estágio atual, eu recomendo:
-
-## obrigatório
-- teste local da lib
-- teste em um projeto exemplo
-- teste em pelo menos 1 projeto real
-- teste responsivo
-
-## opcional (mais tarde)
-- Storybook
-- testes automatizados
-- snapshot visual
-- CI
-
----
-
-# 3. COMO TESTAR LOCALMENTE A LIB
-
-## Estrutura recomendada
-Você precisa ter:
-
-- repositório da lib `prodexy-ui`
-- um projeto de exemplo para consumir a lib
-- idealmente um projeto real usando a lib
-
----
-
-## Fluxo local recomendado
-
-### Passo 1 — rodar a lib em modo desenvolvimento
-Você pode usar um projeto de exemplo dentro da própria lib ou usar `npm link`.
-
-### Opção A — projeto de exemplo dentro da lib
-Exemplo:
-
-```txt
-prodexy-ui/
-  src/
-  docs/
-  playground/
+### Na lib
+```bash
+pnpm install
+pnpm build
 ```
 
-O `playground/` é um projeto simples só para testar os componentes.
+ou
 
-Essa é a melhor forma.
+```bash
+npm install
+npm run build
+```
+
+### Em pelo menos um projeto consumidor
+```bash
+pnpm install
+pnpm dev
+pnpm build
+```
 
 ---
 
-## O que testar no playground
-Crie uma página com:
+## O que testar visualmente
+Sempre valide pelo menos estes componentes:
 
 - Button
 - Input
-- Select
-- Dialog
-- Badge
-- Table
-- Tabs
-- Toast
+- Textarea
 - Card
-
-Nessa página você vê tudo rápido.
-
----
-
-# 4. FORMA MAIS SIMPLES DE DEBUGAR
-
-## Debug visual
-O mais importante para UI é:
-
-- abrir no navegador
-- usar DevTools
-- inspecionar classes
-- inspecionar CSS variables
-- testar breakpoints
+- Dialog
+- Sheet
+- Select
+- Tabs
+- Table
+- Badge
+- Tooltip
+- Toast/Sonner
+- Sidebar
+- Chart, se alterado
 
 ### O que observar
 - padding
-- gap
 - alinhamento
 - tipografia
 - contraste
-- hover
-- focus
 - borda
 - sombra
+- estados de hover/focus/disabled
 - overflow
+- altura e largura mínimas
 
 ---
 
-## Debug de variáveis de tema
-Se a lib usa branding por CSS variables, confira se o projeto cliente realmente carregou:
-
-```css
-:root {
-  --brand-primary: ...;
-}
-```
-
-No DevTools:
-- abra o elemento
-- veja o valor computado
-- confirme se a variável existe
-
-Se a variável não existir, o problema normalmente está em:
-- import do `brand.css`
-- ordem de imports
-- conflito de CSS
-
----
-
-# 5. COMO TESTAR BRANDING
-
-Toda mudança visual importante deve ser testada em pelo menos 3 cenários:
-
-## Cenário A — tema padrão
-Exemplo:
-- roxo/azul
-
-## Cenário B — tema claro
-Exemplo:
-- fundo claro
-- textos escuros
-
-## Cenário C — tema com cor forte
-Exemplo:
-- verde
-- vinho
-- laranja
-
-Isso serve para detectar:
-- contraste ruim
-- borda sumindo
-- componente “lavado”
-- hover invisível
-
----
-
-# 6. TESTE RESPONSIVO (OBRIGATÓRIO)
-
-Você precisa sempre testar a lib nestas larguras:
+## Larguras mínimas para teste responsivo
+Teste pelo menos em:
 
 - 375px
 - 768px
 - 1024px
 - 1440px
 
-### Verificar:
-- botões quebrando linha?
-- cards espremidos?
-- input muito pequeno?
-- modal passa da tela?
-- tabela estoura largura?
-- menu mobile continua usável?
+---
+
+## Checklist de integração no projeto consumidor
+Antes de culpar a lib, valide estes pontos no projeto:
+
+- [ ] `@prodexy/ui` instalada corretamente
+- [ ] `tw-animate-css` instalada
+- [ ] `@prodexy/ui/styles.css` importado no `globals.css`
+- [ ] branding importado depois da folha da lib
+- [ ] `@source` apontando para `node_modules/@prodexy/ui`
+- [ ] imports sem duplicação
+- [ ] `layout.tsx` consistente com branding
 
 ---
 
-# 7. COMO TESTAR EM UM PROJETO REAL
+## Erros comuns e diagnóstico
 
-Esse é o teste mais importante.
+### 1. `Can't resolve 'tw-animate-css'`
+**Causa provável:** projeto consumidor sem a dependência `tw-animate-css`.
 
-Sempre que mudar a lib:
+**Como confirmar:** o erro aparece ao processar `globals.css` ou `@prodexy/ui/styles.css`.
 
-## Passo 1
-Atualize a lib
-
-## Passo 2
-Instale/atualize no Projeto 1
-
-## Passo 3
-Suba o projeto localmente
-
-## Passo 4
-Verifique:
-- tela inicial
-- dashboard
-- formulários
-- modal
-- tabelas
-- menu
-- mobile
-
-Porque muitas vezes a lib funciona isolada e quebra dentro do projeto real.
-
----
-
-# 8. COMO FAZER TESTE MANUAL DIREITO
-
-Crie um checklist padrão.
-
-## Checklist mínimo por release da lib
-- [ ] botão renderiza certo
-- [ ] input renderiza certo
-- [ ] select funciona
-- [ ] dialog abre/fecha
-- [ ] toast aparece
-- [ ] tabs trocam
-- [ ] tabela não quebra
-- [ ] responsivo ok
-- [ ] branding ok
-- [ ] projeto real ok
-
----
-
-# 9. COMO DEBUGAR PROBLEMAS COMUNS
-
-## Problema: cor não mudou
-Verificar:
-- o `brand.css` está importado?
-- a variável está com nome certo?
-- a lib usa `var(--brand-primary)` mesmo?
-- outra regra CSS está sobrescrevendo?
-
----
-
-## Problema: fonte não mudou
-Verificar:
-- a fonte foi realmente carregada?
-- a variável está correta?
-- a lib está usando `var(--brand-font-body)`?
-- existe font fallback?
-
----
-
-## Problema: componente quebrou depois da atualização
-Verificar:
-- mudou API do componente?
-- mudou classe base?
-- projeto cliente usava algum estilo custom por fora?
-- import está apontando para a lib certa?
-
----
-
-## Problema: modal/toast não funciona
-Verificar:
-- provider necessário está montado?
-- hook foi exportado corretamente?
-- dependência visual foi importada?
-
----
-
-# 10. COMO TESTAR A LIB ANTES DE PUBLICAR
-
-Sempre siga esta ordem:
-
-## Ordem correta
-1. testar no playground
-2. testar branding
-3. testar responsivo
-4. testar em projeto real
-5. só depois publicar nova versão
-
-Nunca publique primeiro para “ver depois”.
-
----
-
-# 11. COMO FAZER VERSIONAMENTO SEM BAGUNÇA
-
-Use versionamento simples:
-
-- `1.0.0` → primeira versão estável
-- `1.0.1` → ajuste pequeno visual
-- `1.1.0` → novo componente ou melhoria relevante
-- `2.0.0` → mudança que quebra compatibilidade
-
-### Regra prática
-Se um projeto cliente precisará mudar código para acompanhar a lib:
-> isso provavelmente é uma mudança maior
-
----
-
-# 12. O QUE É POSSÍVEL AUTOMATIZAR (NO FUTURO)
-
-Mais tarde você pode automatizar:
-
-## A. Storybook
-Para visualizar todos os componentes isolados
-
-## B. Vitest / Jest
-Para testar comportamento
-
-## C. Playwright
-Para testar interação visual
-
-## D. Chromatic / screenshot diff
-Para detectar quebra visual
-
----
-
-# 13. O QUE EU RECOMENDO PRA VOCÊ AGORA
-
-No seu estágio atual, o melhor custo-benefício é:
-
-## agora
-- playground
-- checklist manual
-- teste em projeto real
-- teste responsivo
-
-## depois
-- Storybook
-
-## mais à frente
-- Playwright / snapshot
-
----
-
-# 14. ESTRUTURA RECOMENDADA PARA TESTES
-
-Você pode deixar assim:
-
-```txt
-prodexy-ui/
-  src/
-  docs/
-  playground/
-  tests/
+**Correção:**
+```bash
+pnpm add -D tw-animate-css
 ```
 
-### playground
-para ver os componentes
+---
 
-### tests
-para automação futura
+### 2. `the name 'X' is defined multiple times`
+**Causa provável:** imports duplicados do mesmo componente no mesmo arquivo.
+
+**Correção:** consolidar em um único import.
+
+Exemplo:
+```tsx
+import { Button, Input, Card } from '@prodexy/ui'
+```
 
 ---
 
-# 15. FLUXO DE TRABALHO RECOMENDADO
-
-Sempre que alterar a lib:
-
-## fluxo ideal
-1. alterar componente
-2. testar no playground
-3. testar com branding diferente
-4. testar responsivo
-5. testar no Projeto 1
-6. publicar nova versão
-7. atualizar projetos clientes
+### 3. Componente sem estilo
+**Causas prováveis:**
+- CSS global da lib não importado
+- branding importado na ordem errada
+- `@source` faltando
+- conflito com CSS antigo do projeto
 
 ---
 
-# 16. RESUMO FINAL
+### 4. Build da lib falha no DTS
+**Causa provável:** tipagem incompatível em exports da lib.
 
-Para você, hoje, testar a lib significa 4 coisas:
+**Abordagem:**
+- rodar build isolado da lib
+- corrigir arquivo específico
+- só depois retestar no projeto consumidor
 
-## 1. Ver o componente isolado
-Playground
+---
 
-## 2. Ver se visualmente continua bom
-Teste visual
+## Estratégia recomendada de debug
 
-## 3. Ver se continua funcionando
-Teste funcional
+### Passo 1 — isolar onde está o erro
+Pergunta:
+- quebra na lib sozinha?
+- ou quebra apenas no projeto consumidor?
 
-## 4. Ver se o projeto real não quebrou
-Teste de integração
+### Passo 2 — validar dependências do projeto consumidor
+Compare `package.json`, `globals.css`, `layout.tsx` e lockfile com um projeto que já funciona.
 
-Esse é o caminho certo agora.
+### Passo 3 — validar CSS global
+É comum o problema estar em:
+- ordem de imports
+- dependência ausente
+- fonte não carregada
 
-Não precisa começar com um laboratório gigante.
-Comece com:
-- playground
-- checklist
-- projeto real
+### Passo 4 — validar imports dos componentes
+Imports duplicados ou mistura de UI local com UI da lib geram falsos sintomas.
 
-Isso já resolve a maior parte dos problemas.
+### Passo 5 — validar build de produção
+`dev` passando não encerra a validação. Sempre rode `build`.
+
+---
+
+## Matriz mínima de testes antes de publicar versão nova
+
+- [ ] lib compila
+- [ ] componente alterado testado visualmente
+- [ ] componente alterado testado funcionalmente
+- [ ] projeto consumidor real sobe em `dev`
+- [ ] projeto consumidor real sobe em `build`
+- [ ] branding de pelo menos um cliente continua correto
+- [ ] sem regressão evidente em responsividade
+
+---
+
+## Recomendação de evolução do processo
+Com o crescimento da lib, vale considerar:
+
+- playground interno
+- Storybook
+- snapshots visuais
+- CI com build da lib + build de projeto exemplo
+- checklist de release
+
+Mas, enquanto isso não existir, o fluxo manual acima deve ser seguido sem exceção.
+

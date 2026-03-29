@@ -1,235 +1,217 @@
-# 02 — COMO MIGRAR UM PROJETO EXISTENTE PARA USAR A `@prodexy/ui`
+# Como migrar um projeto existente para `@prodexy/ui`
 
-Este documento explica como pegar um projeto que já existe e substituir o design local pela lib `@prodexy/ui`.
+## Objetivo
+Este guia mostra como substituir uma UI local ou fragmentada por `@prodexy/ui` sem quebrar o projeto.
 
-O objetivo é:
-- remover o design duplicado
-- fazer o projeto usar a mesma base visual dos outros
-- manter a lógica de negócio intacta
+A meta da migração é:
+
+- centralizar UI genérica na lib
+- reduzir duplicação
+- manter regras de negócio intactas
+- preparar o projeto para branding padronizado
 
 ---
 
-# 1. O QUE ENTRA E O QUE SAI
+## Estratégia correta
+Não tente migrar tudo de uma vez e depois descobrir o que quebrou. A abordagem correta é por camadas.
 
-## Sai do projeto
-Tudo que for UI genérica e já existir na lib, por exemplo:
+### Ordem recomendada
+1. instalar a lib
+2. configurar CSS global e branding
+3. migrar componentes básicos
+4. validar build
+5. migrar componentes compostos
+6. remover sobras locais
+
+---
+
+## 1. Mapear o que existe hoje
+Antes de trocar qualquer import, classifique os arquivos atuais:
+
+### UI genérica candidata à remoção
+- `components/ui/button.tsx`
+- `components/ui/input.tsx`
+- `components/ui/card.tsx`
+- `components/ui/dialog.tsx`
+- `components/ui/select.tsx`
+- `components/ui/table.tsx`
+- `components/ui/tabs.tsx`
+- `components/ui/toast.tsx`
+
+### Deve permanecer no projeto
+- componentes de domínio
+- header/sidebar próprios do sistema
+- telas de negócio
+- serviços e integração
+- autenticação
+- páginas
+
+---
+
+## 2. Instalar dependências necessárias
+
+### pnpm
+```bash
+pnpm add @prodexy/ui@git+https://github.com/Modaltech1/prodexy-ui.git next-themes
+pnpm add -D tailwindcss @tailwindcss/postcss postcss tw-animate-css
+```
+
+### npm
+```bash
+npm install @prodexy/ui@git+https://github.com/Modaltech1/prodexy-ui.git next-themes
+npm install -D tailwindcss @tailwindcss/postcss postcss tw-animate-css
+```
+
+---
+
+## 3. Criar branding local
+Adicione:
 
 ```txt
-components/ui/
-hooks/use-mobile.ts
-hooks/use-toast.ts
+branding/
+  brand.ts
+  brand.css
 ```
 
-E possivelmente:
-- utilitários genéricos de UI
-- wrappers visuais duplicados
-- CSS base antigo que redefinia os mesmos componentes
-
-## Fica no projeto
-- páginas
-- menu/sidebar
-- layout
-- rotas
-- componentes de negócio
-- regras de negócio
-- integrações
-- branding
+Não mova branding para a lib.
 
 ---
 
-# 2. ORDEM CORRETA DE MIGRAÇÃO
-
-## Passo 1
-Instale a lib:
-
-```bash
-npm install git+https://github.com/Modaltech1/prodexy-ui.git
-```
-
-## Passo 2
-Crie a pasta `branding/` no projeto
-
-## Passo 3
-Configure `brand.ts` e `brand.css`
-
-## Passo 4
-Corrija `app/layout.tsx`
-
-## Passo 5
-Corrija `app/globals.css`
-
-## Passo 6
-Troque os imports dos componentes
-
-## Passo 7
-Só depois remova `components/ui/`
-
----
-
-# 3. EXEMPLO DE `layout.tsx`
-
-```tsx
-import type { Metadata, Viewport } from "next"
-import { Poppins, DM_Sans } from "next/font/google"
-import { brand } from "@/branding/brand"
-import "./globals.css"
-
-const headingFont = Poppins({
-  subsets: ["latin"],
-  variable: "--font-heading",
-  weight: ["400", "500", "600", "700"],
-})
-
-const bodyFont = DM_Sans({
-  subsets: ["latin"],
-  variable: "--font-body",
-  weight: ["400", "500", "700"],
-})
-
-export const metadata: Metadata = {
-  title: brand.appName,
-  description: brand.description,
-  icons: {
-    icon: [{ url: brand.logoUrl }],
-    apple: brand.logoUrl,
-  },
-}
-
-export const viewport: Viewport = {
-  themeColor: brand.colors.primary,
-}
-
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <html lang="pt-BR">
-      <body className={`${headingFont.variable} ${bodyFont.variable} font-sans antialiased`}>
-        {children}
-      </body>
-    </html>
-  )
-}
-```
-
----
-
-# 4. EXEMPLO DE `globals.css`
+## 4. Ajustar `globals.css`
+No projeto, o CSS global deve conter pelo menos:
 
 ```css
 @import "@prodexy/ui/styles.css";
 @import "../branding/brand.css";
 
+@source "../app/**/*.{ts,tsx}";
+@source "../components/**/*.{ts,tsx}";
 @source "../node_modules/@prodexy/ui/dist/**/*.{js,mjs}";
 @source "../node_modules/@prodexy/ui/src/**/*.{ts,tsx}";
 ```
 
----
-
-# 5. COMO TROCAR IMPORTS
-
-## Antes
-```ts
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
-```
-
-## Depois
-```ts
-import { Button, Card, Dialog, DialogContent } from "@prodexy/ui"
-```
-
-Faça isso arquivo por arquivo.
+### Regra importante
+Se o projeto tiver muito CSS global antigo, não remova tudo cegamente. Primeiro garanta que a base da lib está funcionando, depois limpe o que sobrou.
 
 ---
 
-# 6. O QUE TESTAR DEPOIS DE CADA BLOCO DE MIGRAÇÃO
+## 5. Ajustar `layout.tsx`
+O layout deve importar apenas o `globals.css` e usar branding para metadata e fontes.
 
-Depois de trocar alguns imports, rode:
+Verifique:
+- metadata configurada
+- fontes mapeadas para `--font-heading` e `--font-body`
+- body com `font-sans antialiased`
+
+---
+
+## 6. Migrar imports dos componentes
+
+### Antes
+```tsx
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+```
+
+### Depois
+```tsx
+import { Button, Card, Dialog, DialogContent } from '@prodexy/ui'
+```
+
+### Regra prática
+Faça arquivo por arquivo.
+
+Não troque tudo e só depois teste.
+
+---
+
+## 7. Testar a cada bloco de migração
+Depois de migrar um grupo de componentes, rode:
+
+```bash
+pnpm dev
+```
+
+ou
 
 ```bash
 npm run dev
 ```
 
-Teste:
-- botão
-- input
-- select
-- dialog
-- dropdown
-- tabela
+Valide:
+- carregamento do CSS
+- botões
+- inputs
+- dialogs
+- dropdowns
+- tabelas
 - tabs
-- toast
+- toasts
 
 ---
 
-# 7. QUANDO REMOVER A PASTA `components/ui`
+## 8. Só então remova UI local duplicada
+Remova a pasta `components/ui/` apenas quando:
 
-Só remova quando:
+- todos os imports principais já foram trocados
+- o projeto compila
+- não restam referências antigas
 
-- todos os imports já tiverem sido trocados
-- o projeto já estiver rodando
-- você tiver certeza que não restou nenhum componente antigo
+### Ajuda prática
+Faça busca por:
 
----
-
-# 8. PROBLEMAS MAIS COMUNS
-
-## Problema 1 — componente aparece sem estilo
-Causa provável:
-- `globals.css` errado
-- `@source` faltando
-- CSS da lib não importado
-
-## Problema 2 — modal não abre direito
-Causa provável:
-- projeto ainda usando componente local
-- CSS da lib não foi gerado
-- diálogo sem import correto
-
-## Problema 3 — fonte diferente do esperado
-Causa provável:
-- branding não configurado
-- `layout.tsx` sem as fontes
-- variáveis de fonte não aplicadas
-
----
-
-# 9. ARQUIVO pnpm-workspace.yaml
-
-Crie um pnpm-workspace.yaml com:
-```yaml
-onlyBuiltDependencies:
-  - "@prodexy/ui"
+```txt
+@/components/ui/
 ```
 
----
-
-# 10. CHECKLIST DE MIGRAÇÃO
-
-- [ ] instalei a lib
-- [ ] criei `branding/brand.ts`
-- [ ] criei `branding/brand.css`
-- [ ] corrigi `layout.tsx`
-- [ ] corrigi `globals.css`
-- [ ] troquei imports locais pelos da lib
-- [ ] testei os componentes principais
-- [ ] removi `components/ui/`
-- [ ] removi hooks visuais duplicados
-- [ ] projeto rodando sem design duplicado
+Se ainda houver ocorrências relevantes, a remoção é prematura.
 
 ---
 
-# 11. RESUMO
+## 9. Erros comuns durante migração
 
-Migrar projeto existente é:
+### 1. Import duplicado no mesmo arquivo
+Sintoma: `the name 'Button' is defined multiple times`
 
-1. instalar a lib
-2. configurar branding
-3. configurar layout/css global
-4. trocar imports
-5. remover design local
+Causa: o mesmo componente foi importado repetidamente.
 
-A lógica do projeto não muda.
-O que muda é só a fonte do design.
+Solução: consolidar tudo em um único import.
+
+### 2. Erro de `tw-animate-css`
+Sintoma: `Can't resolve 'tw-animate-css'`
+
+Causa: o projeto não instalou a dependência exigida pela folha da lib.
+
+Solução:
+```bash
+pnpm add -D tw-animate-css
+```
+
+### 3. Estilo não aparece
+Causas possíveis:
+- `globals.css` configurado errado
+- ordem de import incorreta
+- `@source` incompleto
+- projeto ainda usando UI local concorrente
+
+### 4. Fonte errada
+Causas possíveis:
+- fontes não configuradas no layout
+- branding sem variáveis de fonte
+
+---
+
+## 10. Checklist final de migração
+
+- [ ] lib instalada
+- [ ] `tw-animate-css` instalada
+- [ ] branding criado
+- [ ] `globals.css` configurado
+- [ ] `layout.tsx` ajustado
+- [ ] imports trocados por `@prodexy/ui`
+- [ ] UI local duplicada removida
+- [ ] projeto compila em dev
+- [ ] projeto compila em build
+- [ ] branding validado
+

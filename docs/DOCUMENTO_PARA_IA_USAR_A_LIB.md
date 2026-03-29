@@ -1,94 +1,144 @@
-# INSTRUÇÃO BASE
+# Guia de instrução para IA usar `@prodexy/ui`
 
-Use esta instrução no prompt:
+## Finalidade
+Este documento existe para orientar agentes, assistentes e IAs de geração de código a usarem a `@prodexy/ui` corretamente, sem recriar um design system paralelo dentro do projeto.
 
-## TEXTO BASE
-Este projeto deve usar obrigatoriamente a lib de UI compartilhada `@prodexy/ui`, que já define todo o design base do sistema.  
-Não crie um novo design system local.  
-Não recrie componentes genéricos como Button, Input, Card, Dialog, Select, Table, Tabs, Badge ou Toast.
+---
 
-### Regras obrigatórias
-1. Importar componentes visuais da lib `@prodexy/ui`
-2. Usar `@prodexy/ui/styles.css` no CSS global
-3. Criar `branding/brand.css` e `branding/brand.ts` localmente para definir:
-   - nome da marca
-   - logo
-   - cores
-   - fontes
-4. Não criar `components/ui` local
-5. O projeto deve manter só:
-   - páginas
-   - menu
-   - lógica de negócio
-   - branding
-   - integrações
-6. O projeto deve usar o mesmo padrão visual da lib:
-   - bordas
-   - sombras
-   - espaçamentos
-   - inputs
-   - botões
-   - dialogs
-   - cards
-   - tabelas
-7. O CSS global deve conter:
+## Instrução base
+Use o texto abaixo como instrução principal quando pedir geração de código para projetos que devem consumir a lib.
 
+### Prompt base recomendado
+> Este projeto deve usar a lib compartilhada `@prodexy/ui` como única fonte de componentes visuais genéricos.
+> Não recrie `Button`, `Input`, `Card`, `Dialog`, `Select`, `Table`, `Tabs`, `Badge`, `Toast`, `Tooltip`, `Sheet`, `Popover` ou equivalentes localmente.
+> O projeto deve manter localmente apenas branding, páginas, layouts, navegação, regras de negócio, integrações e componentes específicos do domínio.
+> Configure `branding/brand.ts` e `branding/brand.css`.
+> Configure `app/globals.css` para importar `@prodexy/ui/styles.css` e depois o branding local.
+> Garanta compatibilidade com Tailwind CSS v4 e instale `tw-animate-css`, pois a folha da lib depende desse pacote.
+> Em arquivos de página e componentes, importe os elementos visuais diretamente de `@prodexy/ui`, consolidando os imports para evitar duplicação.
+
+---
+
+## Regras obrigatórias para a IA
+
+1. Usar `@prodexy/ui` para componentes visuais genéricos
+2. Não criar `components/ui` local, salvo instrução explícita
+3. Não duplicar design system no projeto
+4. Criar `branding/brand.ts` e `branding/brand.css`
+5. Importar `@prodexy/ui/styles.css` no CSS global
+6. Importar o branding local depois do CSS da lib
+7. Garantir que o projeto tenha `tw-animate-css` instalada
+8. Consolidar imports para evitar símbolos duplicados no mesmo arquivo
+9. Manter páginas, regras de negócio e integrações no projeto
+10. Não mover branding de cliente para a lib
+
+---
+
+## Estrutura esperada do projeto gerado
+
+```txt
+app/
+branding/
+  brand.ts
+  brand.css
+public/
+  logo.svg
+  favicon.ico
+components/
+lib/
+```
+
+ou, se usar `src/`:
+
+```txt
+src/
+  app/
+  branding/
+    brand.ts
+    brand.css
+  components/
+  lib/
+public/
+```
+
+---
+
+## Exemplo de `globals.css`
 ```css
 @import "@prodexy/ui/styles.css";
 @import "../branding/brand.css";
 
+@source "../app/**/*.{ts,tsx}";
+@source "../components/**/*.{ts,tsx}";
 @source "../node_modules/@prodexy/ui/dist/**/*.{js,mjs}";
 @source "../node_modules/@prodexy/ui/src/**/*.{ts,tsx}";
 ```
 
-8. O `layout.tsx` deve importar apenas `./globals.css` e usar `brand.appName`, `brand.description` e `brand.logoUrl`
-9. O projeto deve ser preparado para branding por cliente
-10. Todo componente de negócio pode ser criado localmente, mas o design deve vir da lib
-11. Crie um pnpm-workspace.yaml com:
-```yaml
-onlyBuiltDependencies:
-  - "@prodexy/ui"
+---
+
+## Exemplo de import correto
+```tsx
+import { Button, Card, CardContent, Input, Label, Dialog, DialogContent } from '@prodexy/ui'
 ```
----
 
-# PROMPT
-
-> Este projeto deve usar a lib compartilhada `@prodexy/ui` como única fonte de design.  
-> Não crie design system local.  
-> Não crie `components/ui` local.  
-> Use os componentes da lib para Button, Input, Card, Dialog, Select, Table, Tabs, Badge, Toast e afins.  
-> O projeto deve manter localmente apenas branding, páginas, regras de negócio, integrações, navegação e componentes específicos do domínio.  
-> Crie os arquivos `branding/brand.ts` e `branding/brand.css`.  
-> Configure `app/globals.css` para importar `@prodexy/ui/styles.css` e o branding local.  
-> O projeto precisa ser compatível com múltiplos clientes mudando apenas logo, nome, fonte e cores.
+### Evite gerar isto
+```tsx
+import { Button } from '@prodexy/ui'
+import { Button, Input } from '@prodexy/ui'
+```
 
 ---
 
-# NÃO FAZER
-
-- não duplicar botões locais
-- não duplicar inputs locais
-- não criar CSS base concorrente
-- não reimplementar modal/select/card
-- não criar outra estrutura visual fora da lib
-- não alterar o padrão visual da lib sem instrução explícita
-
----
-
-# PODE CRIAR LOCALMENTE
-
-- sidebar
-- header
-- dashboard
-- cards de negócio
-- páginas de produtos, vendas, clientes etc.
-- wrappers compostos específicos do domínio
-
-Mas sempre usando os blocos visuais da lib.
+## Exemplo de `package.json` mínimo relevante
+```json
+{
+  "dependencies": {
+    "@prodexy/ui": "git+https://github.com/Modaltech1/prodexy-ui.git",
+    "next": "^16.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "next-themes": "^0.4.6"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.1.9",
+    "@tailwindcss/postcss": "^4.1.9",
+    "postcss": "^8.5",
+    "tw-animate-css": "1.3.3",
+    "typescript": "^5"
+  }
+}
+```
 
 ---
 
-# COMO PENSAR ESSE DOCUMENTO
+## O que a IA pode criar localmente
+- sidebar específica do domínio
+- header do sistema
+- páginas de dashboard
+- componentes de negócio
+- wrappers compostos específicos do projeto
+- tabelas e cards que carregam lógica do domínio
 
-Este documento não é para explicar a arquitetura da lib.
-Ele é para obrigar você a respeitar o design compartilhado.
+Mas esses elementos devem ser montados usando blocos visuais da lib sempre que possível.
+
+---
+
+## O que a IA não deve criar sem permissão explícita
+- biblioteca de componentes local concorrente
+- novos botões genéricos locais
+- novo `Input`, `Card`, `Dialog` ou `Tabs` local
+- CSS base concorrente que substitua a base da lib
+- identidade visual fixa dentro da lib para um cliente específico
+
+---
+
+## Checklist para IA antes de entregar
+
+- [ ] usei a `@prodexy/ui` para a UI genérica
+- [ ] criei branding local
+- [ ] configurei `globals.css`
+- [ ] incluí `tw-animate-css`
+- [ ] evitei imports duplicados
+- [ ] mantive a lógica de negócio no projeto
+- [ ] não criei design system paralelo
+

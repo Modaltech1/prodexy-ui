@@ -1,124 +1,103 @@
-# 01 — COMO USAR A `@prodexy/ui` EM UM PROJETO NOVO
+# Como usar a `@prodexy/ui` em um projeto novo
 
-Este documento explica, passo a passo, como criar um **novo projeto** e fazer ele usar a lib `@prodexy/ui` desde o começo.
+## Objetivo
+Este guia mostra a configuração correta para iniciar um projeto novo já usando a `@prodexy/ui` como base visual compartilhada.
 
-O objetivo é simples:
+O foco aqui é:
 
-- o projeto tem a sua própria regra de negócio
-- o projeto tem a sua própria marca (nome, logo, cores, fontes)
-- o projeto usa o **mesmo design base** da lib
-
----
-
-# 1. VISÃO GERAL
-
-Quando você cria um projeto novo, a divisão correta é esta:
-
-## A lib `@prodexy/ui` cuida de:
-- componentes visuais
-- CSS base
-- comportamento visual padrão
-- responsividade base
-- estilo dos botões, cards, dialogs, selects, tabelas etc.
-
-## O projeto cliente cuida de:
-- páginas
-- lógica de negócio
-- integrações
-- menu
-- rotas
-- logo
-- cores
-- fontes
-- nome do sistema
+- começar certo
+- evitar duplicação de UI local
+- garantir compatibilidade com Tailwind v4 e Next moderno
+- separar UI compartilhada de branding e negócio
 
 ---
 
-# 2. PRÉ-REQUISITOS
-
-Antes de começar, o projeto precisa ter:
-
-- Next.js
+## Stack recomendada
+- Next.js 15 ou 16
+- React 18 ou 19
+- TypeScript 5
 - Tailwind CSS v4
-- TypeScript
-- React compatível com a lib
-- a lib `@prodexy/ui` publicada no GitHub
+- `@tailwindcss/postcss`
+- `postcss`
+- `tw-animate-css`
+- `next-themes` se houver suporte a tema
 
 ---
 
-# 3. INSTALAR A LIB
-
-Na raiz do projeto:
-
-```bash
-npm install git+https://github.com/Modaltech1/prodexy-ui.git
-```
-
-Depois confirme se a lib entrou:
+## 1. Criar o projeto
+Exemplo com Next.js:
 
 ```bash
-npm ls @prodexy/ui
+npx create-next-app@latest meu-projeto
 ```
+
+Ao final, entre na pasta do projeto.
 
 ---
 
-# 4. ESTRUTURA RECOMENDADA DO PROJETO
+## 2. Instalar dependências
 
-Crie pelo menos esta estrutura:
+### Se usar pnpm
+```bash
+pnpm add @prodexy/ui@git+https://github.com/Modaltech1/prodexy-ui.git
+pnpm add next-themes
+pnpm add -D tailwindcss @tailwindcss/postcss postcss tw-animate-css typescript @types/node @types/react @types/react-dom
+```
+
+### Se usar npm
+```bash
+npm install @prodexy/ui@git+https://github.com/Modaltech1/prodexy-ui.git next-themes
+npm install -D tailwindcss @tailwindcss/postcss postcss tw-animate-css typescript @types/node @types/react @types/react-dom
+```
+
+### Observação importante
+O pacote `tw-animate-css` é necessário porque `@prodexy/ui/styles.css` o importa diretamente.
+
+---
+
+## 3. Estrutura recomendada
 
 ```txt
 app/
 branding/
-  brand.css
   brand.ts
+  brand.css
 public/
   logo.svg
+  favicon.ico
 ```
 
-Se você usa `src/`, pode ser assim:
+Se usar `src/`:
 
 ```txt
 src/
+  app/
   branding/
-    brand.css
     brand.ts
+    brand.css
 public/
   logo.svg
-app/
+  favicon.ico
 ```
-
-O importante é manter:
-- um arquivo de **branding visual**
-- um arquivo de **configuração da marca**
 
 ---
 
-# 5. ARQUIVO `branding/brand.ts`
-
-Crie um arquivo assim:
+## 4. Criar `branding/brand.ts`
 
 ```ts
 export const brand = {
-  appName: "Nome do Cliente",
-  description: "Descrição do sistema",
-  logoUrl: "/logo.svg",
-  colors: {
-    primary: "#0f766e",
-  },
+  appName: 'Meu Projeto',
+  shortName: 'Meu Projeto',
+  description: 'Descrição do sistema.',
+  logoUrl: '/logo.svg',
+  faviconUrl: '/favicon.ico',
+  themeColor: '#23c6b7',
 }
 ```
 
-Esse arquivo é usado para:
-- título
-- metadata
-- logo
-- informações da marca
-
 ---
 
-# 6. ARQUIVO `branding/brand.css`
-
-Crie este arquivo para definir as variáveis de cor e fonte do projeto:
+## 5. Criar `branding/brand.css`
 
 ```css
 :root {
@@ -159,55 +138,75 @@ Crie este arquivo para definir as variáveis de cor e fonte do projeto:
   --sidebar-border: #173055;
   --sidebar-ring: #23c6b7;
 
+  --chart-1: #23c6b7;
+  --chart-2: #0ea5e9;
+  --chart-3: #8b5cf6;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
+
   --radius: 12px;
 
-  --font-heading: "Poppins", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-heading: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
 }
 ```
 
-Você vai trocar esses valores conforme o cliente.
+---
+
+## 6. Configurar `app/globals.css`
+
+### Exemplo recomendado
+```css
+@import "@prodexy/ui/styles.css";
+@import "../branding/brand.css";
+
+@source "../app/**/*.{ts,tsx}";
+@source "../components/**/*.{ts,tsx}";
+@source "../node_modules/@prodexy/ui/dist/**/*.{js,mjs}";
+@source "../node_modules/@prodexy/ui/src/**/*.{ts,tsx}";
+```
+
+### Regras importantes
+- não duplique reset/base CSS concorrente sem necessidade
+- não importe a folha da lib duas vezes
+- mantenha o branding depois do CSS da lib
 
 ---
 
-# 7. CONFIGURAR O `app/layout.tsx`
-
-Use o layout principal assim:
+## 7. Configurar `app/layout.tsx`
 
 ```tsx
-import type { Metadata, Viewport } from "next"
-import { Poppins, DM_Sans } from "next/font/google"
-import { brand } from "@/branding/brand"
-import "./globals.css"
+import type { Metadata, Viewport } from 'next'
+import { Poppins, Inter } from 'next/font/google'
+import { brand } from '@/branding/brand'
+import './globals.css'
 
 const headingFont = Poppins({
-  subsets: ["latin"],
-  variable: "--font-heading",
-  weight: ["400", "500", "600", "700"],
+  subsets: ['latin'],
+  variable: '--font-heading',
+  weight: ['400', '500', '600', '700'],
 })
 
-const bodyFont = DM_Sans({
-  subsets: ["latin"],
-  variable: "--font-body",
-  weight: ["400", "500", "700"],
+const bodyFont = Inter({
+  subsets: ['latin'],
+  variable: '--font-body',
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
   title: brand.appName,
   description: brand.description,
   icons: {
-    icon: [{ url: brand.logoUrl }],
+    icon: [{ url: brand.faviconUrl ?? brand.logoUrl }],
     apple: brand.logoUrl,
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: brand.colors.primary,
+  themeColor: brand.themeColor,
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <body className={`${headingFont.variable} ${bodyFont.variable} font-sans antialiased`}>
@@ -220,120 +219,96 @@ export default function RootLayout({
 
 ---
 
-# 8. CONFIGURAR O `app/globals.css`
+## 8. Consumir componentes da lib
 
-Esse arquivo é o mais importante da integração.
+### Exemplo correto
+```tsx
+import { Button, Card, CardContent, Input, Label } from '@prodexy/ui'
+```
 
-Use assim:
+### Evite
+- importar o mesmo componente várias vezes no mesmo arquivo
+- criar `components/ui` local duplicando componentes já exportados pela lib
 
-```css
-@import "@prodexy/ui/styles.css";
-@import "../branding/brand.css";
+---
 
-/* Faz o Tailwind v4 gerar as classes usadas pela lib */
-@source "../node_modules/@prodexy/ui/dist/**/*.{js,mjs}";
-@source "../node_modules/@prodexy/ui/src/**/*.{ts,tsx}";
+## 9. Exemplo de página inicial mínima
 
-/* se quiser, pode deixar alguma regra mínima específica do projeto aqui */
-body {
-   font-family: var(--font-body);
+```tsx
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@prodexy/ui'
+
+export default function Page() {
+  return (
+    <main className="min-h-screen flex items-center justify-center p-6">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Projeto configurado</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Button>Continuar</Button>
+        </CardContent>
+      </Card>
+    </main>
+  )
 }
-
-# 9. CONFIGURAR O `app/layout.tsx`
-```yaml
-onlyBuiltDependencies:
-  - "@prodexy/ui"
-```
----
-```
-
-## Importante
-Esse arquivo:
-- importa o CSS da lib
-- importa o branding do projeto
-- diz ao Tailwind onde encontrar as classes da lib
-
-Sem isso, os componentes quebram visualmente.
-
----
-
-# 9. COMO IMPORTAR OS COMPONENTES
-
-Nos arquivos do projeto, use:
-
-```ts
-import { Button, Card, Input, Dialog, DialogContent } from "@prodexy/ui"
-```
-
-Não use mais:
-
-```ts
-import { Button } from "@/components/ui/button"
 ```
 
 ---
 
-# 10. QUAIS PASTAS O NOVO PROJETO NÃO PRECISA TER
+## 10. Teste inicial obrigatório
+Depois de configurar tudo, rode:
 
-Se você vai usar a lib, o projeto novo **não precisa criar**:
-
-```txt
-components/ui/
+```bash
+pnpm dev
 ```
 
-Também normalmente não precisa criar localmente:
-- hooks visuais duplicados
-- utilitários visuais duplicados
-- CSS de componentes visuais duplicado
+ou
+
+```bash
+npm run dev
+```
+
+Valide:
+- carregamento sem erro de CSS
+- fonte aplicada
+- cores do branding ativas
+- componentes renderizando com estilo
+- ausência de imports duplicados
 
 ---
 
-# 11. O QUE O PROJETO NOVO DEVE MANTER LOCAL
+## 11. Problemas mais comuns
 
-O projeto mantém localmente:
-- `branding/`
-- `components/` específicos do negócio
-- `features/`
-- `services/`
-- `hooks/` específicos do projeto
-- páginas
-- menu
-- layout da aplicação
-- integrações
+### Erro: `Can't resolve 'tw-animate-css'`
+Causa: pacote ausente no projeto.
 
----
+Solução:
+```bash
+pnpm add -D tw-animate-css
+```
 
-# 12. CHECKLIST DE NOVO PROJETO
+### Componente sem estilo
+Causas possíveis:
+- `globals.css` não importou `@prodexy/ui/styles.css`
+- branding entrou antes do CSS da lib
+- `@source` incompleto
 
-Antes de começar a desenvolver, confira:
-
-- [ ] instalei a lib
-- [ ] criei `branding/brand.ts`
-- [ ] criei `branding/brand.css`
-- [ ] configurei `layout.tsx`
-- [ ] configurei `globals.css`
-- [ ] coloquei a logo em `public/`
-- [ ] estou importando componentes da lib
-- [ ] não criei `components/ui/` local
-- [ ] rodei o projeto e testei Button, Card, Input, Dialog e Select
+### Metadata e branding não aplicados
+Causas possíveis:
+- `brand.ts` não foi usado no `layout.tsx`
+- logo/favicons ausentes em `public/`
 
 ---
 
-# 13. RESUMO
+## Checklist de setup
 
-Para projeto novo, a regra é:
+- [ ] projeto criado
+- [ ] `@prodexy/ui` instalada
+- [ ] `tw-animate-css` instalada
+- [ ] `brand.ts` criado
+- [ ] `brand.css` criado
+- [ ] `globals.css` configurado
+- [ ] `layout.tsx` configurado
+- [ ] componentes importados da lib
+- [ ] página teste renderizando corretamente
 
-## O projeto usa:
-- a lib para o design
-- branding local para identidade
-
-## O projeto NÃO recria:
-- botão
-- input
-- dialog
-- select
-- card
-- tabela
-- estilos base
-
-Isso garante que todos os projetos usem o mesmo design.

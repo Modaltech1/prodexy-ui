@@ -1,252 +1,263 @@
-# COMO MODIFICAR CORES, FONTES E LOGO EM CADA PROJETO
+# Branding por projeto na `@prodexy/ui`
 
-Este documento explica como cada projeto pode usar a mesma lib UI e definir sua própria identidade visual.
+## Objetivo
+A `@prodexy/ui` deve manter um design base consistente, enquanto cada projeto aplica sua própria identidade visual sem reescrever componentes.
 
-## Ideia central
-- a **lib UI** guarda o design padrão
-- cada **projeto** define:
-  - cores
-  - fontes
-  - logo
-  - nome
+O branding do projeto deve controlar:
 
-Assim:
-- o design é o mesmo
-- a identidade muda por cliente
+- nome da aplicação
+- descrição
+- logo
+- favicon
+- cores principais
+- cores de suporte
+- raio padrão
+- fontes
+- eventualmente modo claro/escuro, se o projeto adotar os dois
 
 ---
 
-## 1. O QUE FICA NA LIB
+## Princípio de arquitetura
 
-Na lib ficam:
-- botão
-- input
-- card
-- modal
-- tabela
-- badge
-- tabs
-- dialogs
-- spacing
-- bordas
+### A lib controla
+- estrutura visual
+- escala de componentes
+- espaçamento
 - sombras
-- responsividade
-- animações base
+- estados visuais
+- acessibilidade e comportamento padrão
 
-A lib **não** deve ter:
-- nome de cliente
-- logo do cliente
-- cor fixa de cliente
-- fonte fixa de cliente
+### O projeto controla
+- identidade da marca
+- tokens finais
+- fontes e logo
+- metadata
+- ícones
+
+Isso evita que cada projeto recrie um design system e, ao mesmo tempo, preserva personalização por cliente.
 
 ---
 
-## 2. O QUE FICA NO PROJETO
+## Estrutura recomendada
 
-Cada projeto cliente deve ter sua própria pasta de branding:
+```txt
+branding/
+  brand.ts
+  brand.css
+public/
+  logo.svg
+  favicon.ico
+```
+
+Se o projeto usa `src/`:
 
 ```txt
 src/
   branding/
-    brand.css
     brand.ts
-    logo.svg
+    brand.css
+public/
+  logo.svg
+  favicon.ico
 ```
 
 ---
 
-## 3. ARQUIVO DE CORES DO PROJETO
+## Arquivo `brand.ts`
+Use `brand.ts` para informações semânticas e de metadata.
 
-Crie este arquivo no projeto cliente:
+### Exemplo recomendado
+```ts
+export const brand = {
+  appName: 'Distribuidora Ceará',
+  shortName: 'Distribuidora Ceará',
+  description: 'Sistema interno para gestão comercial, pedidos, clientes e operação.',
+  logoUrl: '/logo.svg',
+  faviconUrl: '/favicon.ico',
+  locale: 'pt-BR',
+  themeColor: '#23c6b7',
+}
+```
 
+### Quando usar esse arquivo
+- `metadata` do Next.js
+- título da aplicação
+- descrição
+- ícones
+- PWA metadata, se existir
+- cabeçalho do sistema, quando necessário
+
+---
+
+## Arquivo `brand.css`
+Use `brand.css` para tokens visuais do projeto.
+
+### Exemplo base completo
 ```css
-/* src/branding/brand.css */
 :root {
-  --brand-primary: #696cff;
-  --brand-primary-foreground: #ffffff;
+  --background: #061226;
+  --foreground: #f8fafc;
 
-  --brand-background: #0f172a;
-  --brand-foreground: #f8fafc;
+  --card: #08152a;
+  --card-foreground: #f8fafc;
 
-  --brand-card: #111827;
-  --brand-card-foreground: #f8fafc;
+  --popover: #08152a;
+  --popover-foreground: #f8fafc;
 
-  --brand-border: #1e293b;
+  --primary: #23c6b7;
+  --primary-foreground: #031311;
 
-  --brand-muted: #0b1220;
-  --brand-muted-foreground: #94a3b8;
+  --secondary: #0d1b2f;
+  --secondary-foreground: #f8fafc;
 
-  --brand-accent: #03c3ec;
-  --brand-accent-foreground: #001018;
+  --muted: #0b1730;
+  --muted-foreground: #94a3b8;
 
-  --brand-danger: #ef4444;
-  --brand-danger-foreground: #ffffff;
+  --accent: #0f213d;
+  --accent-foreground: #f8fafc;
 
-  --brand-radius: 12px;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 
-  --brand-font-heading: "Inter", sans-serif;
-  --brand-font-body: "Inter", sans-serif;
+  --border: #173055;
+  --input: #173055;
+  --ring: #23c6b7;
+
+  --sidebar: #071224;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #23c6b7;
+  --sidebar-primary-foreground: #031311;
+  --sidebar-accent: #0f213d;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #173055;
+  --sidebar-ring: #23c6b7;
+
+  --chart-1: #23c6b7;
+  --chart-2: #0ea5e9;
+  --chart-3: #8b5cf6;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
+
+  --radius: 12px;
+
+  --font-heading: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
 }
 ```
 
-Esse exemplo acima pode ser usado no **Projeto 1**.
-
 ---
 
-## 4. COMO IMPORTAR NO PROJETO
-
-No `layout.tsx` ou arquivo principal do projeto:
-
-```ts
-import "@/branding/brand.css"
-```
-
-Esse import deve acontecer junto do CSS principal.
-
----
-
-## 5. COMO A LIB DEVE USAR ISSO
-
-A lib UI deve usar **CSS variables**.
-
-Exemplo:
+## Ordem correta de importação
+No `app/globals.css` do projeto:
 
 ```css
-.button-primary {
-  background: var(--brand-primary);
-  color: var(--brand-primary-foreground);
-  border-radius: var(--brand-radius);
-}
-
-.card {
-  background: var(--brand-card);
-  color: var(--brand-card-foreground);
-  border: 1px solid var(--brand-border);
-}
-
-body {
-  background: var(--brand-background);
-  color: var(--brand-foreground);
-  font-family: var(--brand-font-body);
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--brand-font-heading);
-}
+@import "@prodexy/ui/styles.css";
+@import "../branding/brand.css";
 ```
+
+O `brand.css` deve entrar depois para sobrescrever os tokens base da lib.
 
 ---
 
-## 6. COMO TROCAR FONTES
+## Exemplo de `layout.tsx`
+```tsx
+import type { Metadata, Viewport } from 'next'
+import { Poppins, Inter } from 'next/font/google'
+import { brand } from '@/branding/brand'
+import './globals.css'
 
-No projeto cliente, troque só estas variáveis:
+const headingFont = Poppins({
+  subsets: ['latin'],
+  variable: '--font-heading',
+  weight: ['400', '500', '600', '700'],
+})
 
-```css
---brand-font-heading: "Poppins", sans-serif;
---brand-font-body: "Inter", sans-serif;
-```
+const bodyFont = Inter({
+  subsets: ['latin'],
+  variable: '--font-body',
+  weight: ['400', '500', '600', '700'],
+})
 
-ou
-
-```css
---brand-font-heading: "DM Sans", sans-serif;
---brand-font-body: "DM Sans", sans-serif;
-```
-
-Se o projeto usar Next.js com `next/font`, aplique as fontes no projeto e mapeie para as variáveis.
-
----
-
-## 7. COMO TROCAR LOGO
-
-A logo fica no projeto cliente, não na lib.
-
-Exemplo:
-
-```txt
-src/branding/logo.svg
-```
-
-Ou em `public/logo.svg`.
-
-Depois, no projeto:
-
-```ts
-export const brand = {
-  name: "Cliente X",
-  logoUrl: "/logo.svg",
-}
-```
-
----
-
-## 8. EXEMPLO DE CONFIG DO PROJETO
-
-```ts
-// src/branding/brand.ts
-export const brand = {
-  name: "Projeto 1",
-  logoUrl: "/logo.svg",
-  colors: {
-    primary: "#696cff",
-    accent: "#03c3ec",
-    background: "#0f172a",
-    foreground: "#f8fafc",
-  },
-  fonts: {
-    heading: "Inter",
-    body: "Inter",
+export const metadata: Metadata = {
+  title: brand.appName,
+  description: brand.description,
+  icons: {
+    icon: [{ url: brand.faviconUrl ?? brand.logoUrl }],
+    apple: brand.logoUrl,
   },
 }
+
+export const viewport: Viewport = {
+  themeColor: brand.themeColor,
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="pt-BR">
+      <body className={`${headingFont.variable} ${bodyFont.variable} font-sans antialiased`}>
+        {children}
+      </body>
+    </html>
+  )
+}
 ```
 
 ---
 
-## 9. EXEMPLO PRÁTICO
+## Boas práticas de branding
 
-### Projeto 1
-- primária: `#696cff`
-- acento: `#03c3ec`
-- fonte: `Inter`
+### 1. Não altere a lib para cada cliente
+Se a necessidade é só trocar cor, fonte, logo, raio ou metadata, isso pertence ao projeto.
 
-### Projeto 2
-- primária: `#16a34a`
-- acento: `#f59e0b`
-- fonte: `Poppins`
+### 2. Evite hardcode visual nas páginas
+Errado:
 
-### Projeto 3
-- primária: `#7c3aed`
-- acento: `#06b6d4`
-- fonte: `DM Sans`
+```tsx
+className="bg-[#23c6b7] text-white"
+```
 
-Todos usam a mesma lib.  
-Só muda o branding local.
+Prefira usar os tokens já expostos pela lib e pelo branding.
 
----
+### 3. Valide contraste
+Sempre teste:
+- texto sobre fundo principal
+- texto em botões primários
+- bordas em cards e inputs
+- hover e focus visíveis
 
-## 10. O QUE NÃO FAZER
-
-Não faça:
-- cor hardcoded dentro dos componentes
-- fonte hardcoded no botão/input/card
-- logo dentro da lib
-- nome do cliente dentro da lib
+### 4. Teste pelo menos em 3 variações de tema
+- escuro
+- claro
+- cor forte
 
 ---
 
-## 11. REGRA FINAL
+## O que entra em branding e o que não entra
 
-### A lib define:
-- o design
-- a estrutura visual
-- a responsividade
-- o comportamento dos componentes
-
-### O projeto define:
-- cor
-- fonte
+### Entra
+- cores
+- fontes
 - logo
-- nome
-- favicon
+- metadata
+- ícones
+- raio padrão
 
-Esse é o modelo certo para usar o mesmo design em múltiplos projetos.
+### Não entra
+- regra de negócio
+- layout de páginas específicas
+- componente de domínio
+- regra de permissão
+- fluxo operacional
+
+---
+
+## Checklist de branding
+
+- [ ] `brand.ts` criado
+- [ ] `brand.css` criado
+- [ ] logo em `public/`
+- [ ] `globals.css` importa primeiro a lib e depois o branding
+- [ ] `layout.tsx` usa as fontes e metadata da marca
+- [ ] contraste validado
+- [ ] componentes principais testados com a nova identidade
+
