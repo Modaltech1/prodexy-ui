@@ -223,8 +223,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ### Exemplo correto
 ```tsx
+'use client'
+
 import { Button, Card, CardContent, Input, Label } from '@prodexy/ui'
 ```
+
+### Regra importante no Next App Router
+O entrypoint principal da `@prodexy/ui` também exporta componentes de formulário que usam `react-hook-form`, como `Form`, `FormField`, `FormControl` e `FormMessage`.
+
+Por isso, em projetos com `app/`, arquivos que importam componentes diretamente de `@prodexy/ui` devem estar em um client boundary:
+
+```tsx
+'use client'
+
+import { Button, Card, CardContent } from '@prodexy/ui'
+```
+
+Se a página precisar continuar como Server Component, crie um componente filho com `'use client'` e importe a `@prodexy/ui` nele. Não crie uma biblioteca `components/ui` local para substituir ou contornar a `@prodexy/ui`.
 
 ### Evite
 - importar o mesmo componente várias vezes no mesmo arquivo
@@ -235,6 +250,8 @@ import { Button, Card, CardContent, Input, Label } from '@prodexy/ui'
 ## 9. Exemplo de página inicial mínima
 
 ```tsx
+'use client'
+
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@prodexy/ui'
 
 export default function Page() {

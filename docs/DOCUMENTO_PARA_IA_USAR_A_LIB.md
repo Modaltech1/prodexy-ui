@@ -16,6 +16,7 @@ Use o texto abaixo como instrução principal quando pedir geração de código 
 > Configure `app/globals.css` para importar `@prodexy/ui/styles.css` e depois o branding local.
 > Garanta compatibilidade com Tailwind CSS v4 e instale `tw-animate-css`, pois a folha da lib depende desse pacote.
 > Em arquivos de página e componentes, importe os elementos visuais diretamente de `@prodexy/ui`, consolidando os imports para evitar duplicação.
+> Em projetos Next com App Router, qualquer arquivo que importe `@prodexy/ui` diretamente deve estar em um client boundary (`'use client'`) ou delegar esse import para um componente filho client.
 
 ---
 
@@ -29,8 +30,9 @@ Use o texto abaixo como instrução principal quando pedir geração de código 
 6. Importar o branding local depois do CSS da lib
 7. Garantir que o projeto tenha `tw-animate-css` instalada
 8. Consolidar imports para evitar símbolos duplicados no mesmo arquivo
-9. Manter páginas, regras de negócio e integrações no projeto
-10. Não mover branding de cliente para a lib
+9. No Next App Router, marcar com `'use client'` os arquivos que importam `@prodexy/ui` diretamente, ou mover esse import para um componente filho client
+10. Manter páginas, regras de negócio e integrações no projeto
+11. Não mover branding de cliente para a lib
 
 ---
 

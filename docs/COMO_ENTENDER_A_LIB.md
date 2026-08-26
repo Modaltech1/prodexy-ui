@@ -177,6 +177,17 @@ Sintoma: projeto abre com tokens padrão da lib em vez da identidade do cliente.
 ### 4. Mistura entre UI local e UI da lib
 Sintoma: duplicação de estilos, inconsistência visual e comportamento divergente.
 
+### 5. Erro de `FormProvider` ou `Controller` no Next App Router
+Sintoma: o build falha com mensagem parecida com:
+
+```txt
+Attempted import error: 'FormProvider' is not exported from 'react-hook-form'
+```
+
+Motivo: o entrypoint principal da `@prodexy/ui` exporta também os componentes de formulário, e esses componentes usam APIs client-side do `react-hook-form`. Quando um Server Component importa `@prodexy/ui` diretamente, o Next pode resolver o `react-hook-form` pela condição `react-server`, que não exporta `FormProvider`, `Controller`, `useFormContext` nem `useFormState`.
+
+Correção: o arquivo que importa `@prodexy/ui` diretamente deve ser um Client Component com `'use client'`. Se a rota precisar continuar server-side, mantenha a página server e mova a UI que usa `@prodexy/ui` para um componente filho client. Não substitua a lib por componentes locais.
+
 ---
 
 ## Decisão recomendada para evolução
